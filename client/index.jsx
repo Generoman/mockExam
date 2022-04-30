@@ -1,12 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import ReactDOM from "react-dom";
-import {
-  BrowserRouter,
-  Link,
-  Route,
-  Routes,
-  useNavigate,
-} from "react-router-dom";
+import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 import { fetchJSON } from "./fetchJSON";
 import { useLoader } from "./useLoader";
 
@@ -107,7 +101,6 @@ function Movies() {
 }
 
 function LoginPage() {
-  const [redirectUrl, setRedirectUrl] = useState();
   useEffect(async () => {
     const { authorization_endpoint } = await fetchJSON(
       "https://accounts.google.com/.well-known/openid-configuration"
@@ -121,16 +114,13 @@ function LoginPage() {
       redirect_uri: window.location.origin + "/login/callback",
     };
 
-    setRedirectUrl(
-      authorization_endpoint + "?" + new URLSearchParams(parameters)
-    );
+    window.location.href =
+      authorization_endpoint + "?" + new URLSearchParams(parameters);
   }, []);
 
   return (
     <>
-      <h1>Login</h1>
-      <a href={redirectUrl}>Do Login</a>
-      <div>{redirectUrl}</div>
+      <p>Please wait...</p>
     </>
   );
 }
