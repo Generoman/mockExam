@@ -1,0 +1,40 @@
+{
+  "name": "innlevering",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently npm:dev:client npm:dev:server",
+    "dev:client": "cd client && npm run dev",
+    "dev:server": "cd server && npm run dev",
+    "verify": "npm run prettier:check",
+    "verify:root": "npm run verify:client && npm run verify:server",
+    "verify:client": "cd client && npm run test:coverage",
+    "verify:server": "cd server && npm run test:coverage",
+    "prepare": "husky install",
+    "pre-commit": "npm run prettier:check",
+    "prettier:check": "prettier --check **/*.{js,jsx}",
+    "build": "npm install --include=dev && npm run build:server && npm run build:client",
+    "build:server": "cd server && npm run build",
+    "build:client": "cd client && npm run build",
+    "start": "cd server && npm start"
+  },
+  "repository": {
+    "type": "",
+    "url": ""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": ""
+  },
+  "homepage": "",
+  "devDependencies": {
+    "concurrently": "^7.0.0",
+    "eslint": "^8.10.0",
+    "eslint-plugin-react": "^7.29.2",
+    "husky": "^7.0.4",
+    "prettier": "^2.5.1"
+  }
+}
