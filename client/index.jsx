@@ -99,7 +99,7 @@ function Movies() {
   return (
     <Routes>
       <Route path={"/"} element={<AllMovies />} />
-      <Route path={"/movie"} element={<Movie />} />
+      <Route path={"/movie/*"} element={<Movie />} />
       <Route path={"/search"} element={<SearchMovie />} />
       <Route path={"/add"} element={<AddMovie />} />
     </Routes>
@@ -165,8 +165,8 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path={"/"} element={<FrontPage />} />
-        <Route path={"/movies"} element={<Movies />} />
-        <Route path={"/login"} element={<Login />} />
+        <Route path={"/movies/*"} element={<Movies />} />
+        <Route path={"/login/*"} element={<Login />} />
         <Route path={"/profile"} element={<Profile />} />
       </Routes>
     </BrowserRouter>
