@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import {
   BrowserRouter,
@@ -107,9 +107,30 @@ function Movies() {
 }
 
 function LoginPage() {
+  const [redirectUrl, setRedirectUrl] = useState();
+  useEffect(async () => {
+    const { authorization_endpoint } = await fetchJSON(
+      "https://accounts.google.com/.well-known/openid-configuration"
+    );
+
+    const parameters = {
+      response_type: "token",
+      client_id:
+        "634400868877-incko50mf4i2f97adsatsdaiam149s1t.apps.googleusercontent.com",
+      scope: "email profile",
+      redirect_uri: window.location.origin + "/login/callback",
+    };
+
+    setRedirectUrl(
+      authorization_endpoint + "?" + new URLSearchParams(parameters)
+    );
+  }, []);
+
   return (
     <>
-      <h1>Login Page</h1>
+      <h1>Login</h1>
+      <a href={redirectUrl}>Do Login</a>
+      <div>{redirectUrl}</div>
     </>
   );
 }
