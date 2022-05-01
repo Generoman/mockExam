@@ -22,7 +22,7 @@ const app = express();
 app.use(bodyParser.json());
 app.use(cookieParser(Process.env.COOKIE_SECRET));
 
-const mongoClient = new MongoClient(process.env.MONGODB_URL);
+const mongoClient = new MongoClient(process.env.MONGODB_URL); // .env-testing
 mongoClient.connect().then(async () => {
   console.log("Connected to MongoDB");
   app.use(dbApiPath, DatabaseApi(mongoClient.db(dbName)));

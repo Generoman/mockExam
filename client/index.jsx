@@ -115,7 +115,7 @@ function LoginPage() {
 
     const parameters = {
       response_type: "token",
-      client_id: process.env.GOOGLE_CLIENT_ID,
+      client_id: process.env.GOOGLE_CLIENT_ID, // virker ikke ennå
       scope: "email profile",
       redirect_uri: window.location.origin + "/login/callback",
     };
