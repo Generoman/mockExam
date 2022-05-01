@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import ReactDOM from "react-dom";
 import {
   BrowserRouter,
@@ -9,7 +9,6 @@ import {
 } from "react-router-dom";
 import { fetchJSON } from "./fetchJSON";
 import { useLoader } from "./useLoader";
-import * as process from "process";
 
 function FrontPage() {
   return (
@@ -38,7 +37,7 @@ function FrontPage() {
 
 function AllMovies() {
   const { loading, error, data } = useLoader(async () => {
-    return fetchJSON("api/movies");
+    return await fetchJSON("api/movies");
   });
 
   if (loading) {
@@ -107,15 +106,17 @@ function Movies() {
   );
 }
 
-function LoginPage() {
+function LoginRedirect() {
+  const { google_discovery_endpoint, google_client_id } =
+    useContext(LoginContext);
   useEffect(async () => {
     const { authorization_endpoint } = await fetchJSON(
-      "https://accounts.google.com/.well-known/openid-configuration"
+      google_discovery_endpoint
     );
 
     const parameters = {
       response_type: "token",
-      client_id: process.env.GOOGLE_CLIENT_ID, // virker ikke ennå
+      client_id: google_client_id, // virker ikke ennå
       scope: "email profile",
       redirect_uri: window.location.origin + "/login/callback",
     };
@@ -158,7 +159,7 @@ function LoginCallback() {
 function Login() {
   return (
     <Routes>
-      <Route path={"/"} element={<LoginPage />} />
+      <Route path={"/"} element={<LoginRedirect />} />
       <Route path={"/callback"} element={<LoginCallback />} />
     </Routes>
   );
@@ -189,16 +190,39 @@ function Profile() {
   );
 }
 
+const LoginContext = React.createContext(undefined);
+
 function App() {
+  const { loading, error, data } = useLoader(
+    async () => await fetchJSON("/api/config")
+  );
+
+  if (loading) {
+    return (
+      <>
+        <h3>Loading...</h3>
+      </>
+    );
+  }
+  if (error) {
+    return (
+      <>
+        <h1>An Error Occurred</h1>
+        <div>{error.toString()}</div>
+      </>
+    );
+  }
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path={"/"} element={<FrontPage />} />
-        <Route path={"/movies/*"} element={<Movies />} />
-        <Route path={"/login/*"} element={<Login />} />
-        <Route path={"/profile"} element={<Profile />} />
-      </Routes>
-    </BrowserRouter>
+    <LoginContext.Provider value={data}>
+      <BrowserRouter>
+        <Routes>
+          <Route path={"/"} element={<FrontPage />} />
+          <Route path={"/movies/*"} element={<Movies />} />
+          <Route path={"/login/*"} element={<Login />} />
+          <Route path={"/profile"} element={<Profile />} />
+        </Routes>
+      </BrowserRouter>
+    </LoginContext.Provider>
   );
 }
 

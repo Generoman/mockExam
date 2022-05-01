@@ -28,6 +28,17 @@ mongoClient.connect().then(async () => {
   app.use(dbApiPath, DatabaseApi(mongoClient.db(dbName)));
 });
 
+app.get("/api/config", (req, res) => {
+  const body = {
+    google_response_type: "token",
+    google_client_id: process.env.GOOGLE_CLIENT_ID,
+    azure_client_id: process.env.AZURE_CLIENT_ID,
+    google_discovery_endpoint:
+      "https://accounts.google.com/.well-known/openid-configuration",
+  };
+  res.json(body);
+});
+
 app.get("/api/login", async (req, res) => {
   const { access_token } = req.signedCookies;
 
