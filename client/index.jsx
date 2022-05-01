@@ -13,7 +13,7 @@ import { useLoader } from "./useLoader";
 function FrontPage() {
   return (
     <>
-      <h1>Movie Database</h1>
+      <h1>Mock Exam</h1>
       <ul>
         <li>
           <Link to={"/movies"}>See list of movies</Link>
@@ -177,10 +177,14 @@ function Profile() {
     return <div>An error occurred: {error.toString()}</div>;
   }
 
+  const { name, email, picture } = data;
+
   return (
     <>
       <h1>Profile</h1>
-      <div>{JSON.stringify(data)}</div>
+      <img src={picture} alt={"profile picture"} width={"100px"} />
+      <div>Name: {name}</div>
+      <div>Email: {email}</div>
     </>
   );
 }

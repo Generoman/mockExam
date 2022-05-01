@@ -6,7 +6,7 @@ import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import * as Process from "process";
-import { MainApi } from "./mainApi.js";
+import { DatabaseApi } from "./databaseApi.js";
 import { fetchJSON } from "./fetchJSON.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -25,24 +25,27 @@ app.use(cookieParser(Process.env.COOKIE_SECRET));
 const mongoClient = new MongoClient(process.env.MONGODB_URL);
 mongoClient.connect().then(async () => {
   console.log("Connected to MongoDB");
-  app.use(dbApiPath, MainApi(mongoClient.db(dbName)));
+  app.use(dbApiPath, DatabaseApi(mongoClient.db(dbName)));
 });
 
 app.get("/api/login", async (req, res) => {
   const { access_token } = req.signedCookies;
 
-  console.log(access_token);
+  if (access_token) {
+    const { userinfo_endpoint } = await fetchJSON(
+      "https://accounts.google.com/.well-known/openid-configuration"
+    );
 
-  const { userinfo_endpoint } = await fetchJSON(
-    "https://accounts.google.com/.well-known/openid-configuration"
-  );
+    const userinfo = await fetchJSON(userinfo_endpoint, {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+      },
+    });
 
-  const userinfo = await fetchJSON(userinfo_endpoint, {
-    headers: {
-      Authorization: `Bearer ${access_token}`,
-    },
-  });
-  res.json(userinfo);
+    res.json(userinfo);
+  } else {
+    res.sendStatus(401);
+  }
 });
 
 app.post("/api/login", (req, res) => {

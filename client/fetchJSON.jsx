@@ -11,6 +11,7 @@ export async function fetchJSON(url, requestInit) {
     res = await fetch(url);
   } else res = await fetch(url, requestInit);
   if (res.status === 204) {
+    console.log(204);
     return null;
   } else if (res.ok) {
     return await res.json();
