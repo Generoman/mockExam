@@ -1,11 +1,16 @@
 import express from "express";
-import * as path from "path";
-import {MongoClient} from "mongodb";
+import path from "path";
+import { fileURLToPath } from "url";
+import { MongoClient } from "mongodb";
 import dotenv from "dotenv";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import * as Process from "process";
-import {MainApi} from "./mainApi.js";
+import { MainApi } from "./mainApi.js";
+import { fetchJSON } from "./fetchJSON.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
@@ -23,7 +28,30 @@ mongoClient.connect().then(async () => {
   app.use(dbApiPath, MainApi(mongoClient.db(dbName)));
 });
 
-app.use(express.static("../client/dist"));
+app.get("/api/login", async (req, res) => {
+  const { access_token } = req.signedCookies;
+
+  console.log(access_token);
+
+  const { userinfo_endpoint } = await fetchJSON(
+    "https://accounts.google.com/.well-known/openid-configuration"
+  );
+
+  const userinfo = await fetchJSON(userinfo_endpoint, {
+    headers: {
+      Authorization: `Bearer ${access_token}`,
+    },
+  });
+  res.json(userinfo);
+});
+
+app.post("/api/login", (req, res) => {
+  const { access_token } = req.body;
+  res.cookie("access_token", access_token, { signed: true });
+  res.sendStatus(200);
+});
+
+app.use(express.static(path.resolve(__dirname, "..", "client", "dist")));
 
 app.use((req, res, next) => {
   if (req.method === "GET" && !req.path.startsWith("/api")) {
@@ -34,5 +62,7 @@ app.use((req, res, next) => {
 });
 
 const server = app.listen(process.env.PORT || 3000, () => {
-  console.log(`Express server running on http://localhost:${server.address().port}`);
+  console.log(
+    `Express server running on http://localhost:${server.address().port}`
+  );
 });

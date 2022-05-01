@@ -1,7 +1,13 @@
 import React, { useEffect } from "react";
 import ReactDOM from "react-dom";
-import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
-import { fetchJSON } from "./fetchJSON";
+import {
+  BrowserRouter,
+  Link,
+  Route,
+  Routes,
+  useNavigate,
+} from "react-router-dom";
+import { fetchJSON } from "../server/fetchJSON";
 import { useLoader } from "./useLoader";
 
 function FrontPage() {
@@ -10,7 +16,7 @@ function FrontPage() {
       <h1>Movie Database</h1>
       <ul>
         <li>
-          <Link to={"/movies"}>See all movies</Link>
+          <Link to={"/movies"}>See list of movies</Link>
         </li>
         <li>
           <Link to={"/movies/search"}>Search</Link>
@@ -35,7 +41,7 @@ function AllMovies() {
   });
 
   if (loading) {
-    return <>Loading...</>;
+    return <>Please wait...</>;
   }
 
   if (error) {
@@ -126,9 +132,25 @@ function LoginPage() {
 }
 
 function LoginCallback() {
+  const navigate = useNavigate();
+  useEffect(async () => {
+    const { access_token } = Object.fromEntries(
+      new URLSearchParams(window.location.hash.substring(1))
+    );
+
+    await fetch("/api/login", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ access_token }),
+    });
+    navigate("/");
+  }, []);
+
   return (
     <>
-      <h1>Login Callback</h1>
+      <h1>Please wait...</h1>
     </>
   );
 }
@@ -143,9 +165,22 @@ function Login() {
 }
 
 function Profile() {
+  const { loading, data, error } = useLoader(async () => {
+    return await fetchJSON("/api/login");
+  });
+
+  if (loading) {
+    return <div>Please wait...</div>;
+  }
+
+  if (error) {
+    return <div>An error occurred: {error.toString()}</div>;
+  }
+
   return (
     <>
-      <h1>Profile Page</h1>
+      <h1>Profile</h1>
+      <div>{JSON.stringify(data)}</div>
     </>
   );
 }
