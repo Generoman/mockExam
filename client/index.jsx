@@ -9,6 +9,7 @@ import {
 } from "react-router-dom";
 import { fetchJSON } from "./fetchJSON";
 import { useLoader } from "./useLoader";
+import * as process from "process";
 
 function FrontPage() {
   return (
@@ -114,8 +115,7 @@ function LoginPage() {
 
     const parameters = {
       response_type: "token",
-      client_id:
-        "634400868877-incko50mf4i2f97adsatsdaiam149s1t.apps.googleusercontent.com",
+      client_id: process.env.GOOGLE_CLIENT_ID,
       scope: "email profile",
       redirect_uri: window.location.origin + "/login/callback",
     };
