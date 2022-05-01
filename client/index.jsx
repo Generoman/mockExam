@@ -7,7 +7,7 @@ import {
   Routes,
   useNavigate,
 } from "react-router-dom";
-import { fetchJSON } from "../server/fetchJSON";
+import { fetchJSON } from "./fetchJSON";
 import { useLoader } from "./useLoader";
 
 function FrontPage() {

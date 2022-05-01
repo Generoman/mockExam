@@ -4,6 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "push": "npm run push:github && npm run push:heroku",
+    "push:github": "git push github main",
+    "push:heroku": "git push heroku main",
     "dev": "concurrently npm:dev:client npm:dev:server",
     "dev:client": "cd client && npm run dev",
     "dev:server": "cd server && npm run dev",
