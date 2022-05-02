@@ -37,7 +37,7 @@ app.get("/api/config", (req, res) => {
       discovery_endpoint:
         "https://accounts.google.com/.well-known/openid-configuration",
     },
-    id_porten: {
+    idporten: {
       response_type: "code",
       response_mode: "fragment",
       client_id: process.env.AZURE_CLIENT_ID,
