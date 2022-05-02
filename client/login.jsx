@@ -111,13 +111,16 @@ export function LoginCallback(props) {
 
   if (props.endpoint === "google") {
     useEffect(async () => {
+      const body = {
+        access_token,
+        endpoint: props.endpoint,
+      };
       await fetch("/api/login", {
         method: "POST",
         headers: {
           "content-type": "application/json",
-          endpoint: props.endpoint,
         },
-        body: JSON.stringify({ access_token }),
+        body: JSON.stringify(body),
       });
       navigate("/");
     }, []);

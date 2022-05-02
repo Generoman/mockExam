@@ -51,7 +51,8 @@ app.get("/api/config", (req, res) => {
 });
 
 app.get("/api/login", async (req, res) => {
-  const { access_token, endpoint } = req.signedCookies;
+  const { access_token } = req.signedCookies;
+  const { endpoint } = req.cookies;
 
   let endpointURL;
 
@@ -83,7 +84,7 @@ app.get("/api/login", async (req, res) => {
 app.post("/api/login", (req, res) => {
   const { access_token, endpoint } = req.body;
   res.cookie("access_token", access_token, { signed: true });
-  res.cookie("endpoint", endpoint, { signed: true });
+  res.cookie("endpoint", endpoint);
   res.sendStatus(200);
 });
 
