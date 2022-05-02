@@ -30,11 +30,21 @@ mongoClient.connect().then(async () => {
 
 app.get("/api/config", (req, res) => {
   const body = {
-    google_response_type: "token",
-    google_client_id: process.env.GOOGLE_CLIENT_ID,
-    azure_client_id: process.env.AZURE_CLIENT_ID,
-    google_discovery_endpoint:
-      "https://accounts.google.com/.well-known/openid-configuration",
+    google: {
+      response_type: "token",
+      client_id: process.env.GOOGLE_CLIENT_ID,
+      scope: "email profile",
+      discovery_endpoint:
+        "https://accounts.google.com/.well-known/openid-configuration",
+    },
+    id_porten: {
+      response_type: "code",
+      response_mode: "fragment",
+      client_id: process.env.AZURE_CLIENT_ID,
+      scope: "profile",
+      discovery_endpoint:
+        "https://oidc-ver1.difi.no/idporten-oidc-provider/.well-known/openid-configuration",
+    },
   };
   res.json(body);
 });
