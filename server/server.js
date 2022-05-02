@@ -37,41 +37,53 @@ app.get("/api/config", (req, res) => {
       discovery_endpoint:
         "https://accounts.google.com/.well-known/openid-configuration",
     },
-    idporten: {
+    microsoft: {
       response_type: "code",
       response_mode: "fragment",
       client_id: process.env.AZURE_CLIENT_ID,
-      scope: "profile",
+      code_challenge_method: "S256",
+      scope: "openid",
       discovery_endpoint:
-        "https://oidc-ver1.difi.no/idporten-oidc-provider/.well-known/openid-configuration",
+        "https://login.microsoftonline.com/organizations/v2.0/.well-known/openid-configuration",
     },
   };
   res.json(body);
 });
 
 app.get("/api/login", async (req, res) => {
-  const { access_token } = req.signedCookies;
+  const { access_token, endpoint } = req.signedCookies;
 
-  if (access_token) {
-    const { userinfo_endpoint } = await fetchJSON(
-      "https://accounts.google.com/.well-known/openid-configuration"
-    );
+  let endpointURL;
+
+  if (endpoint === "google") {
+    endpointURL =
+      "https://accounts.google.com/.well-known/openid-configuration";
+  } else if (endpoint === "microsoft") {
+    endpointURL =
+      "https://login.microsoftonline.com/organizations/v2.0/.well-known/openid-configuration";
+  }
+
+  if (!access_token) {
+    res.sendStatus(401);
+    res.json(undefined);
+  } else {
+    const { userinfo_endpoint } = await fetchJSON(endpointURL);
 
     const userinfo = await fetchJSON(userinfo_endpoint, {
       headers: {
         Authorization: `Bearer ${access_token}`,
       },
     });
-
-    res.json(userinfo);
-  } else {
-    res.sendStatus(401);
+    if (userinfo) {
+      res.json(userinfo);
+    }
   }
 });
 
 app.post("/api/login", (req, res) => {
-  const { access_token } = req.body;
+  const { access_token, endpoint } = req.body;
   res.cookie("access_token", access_token, { signed: true });
+  res.cookie("endpoint", endpoint, { signed: true });
   res.sendStatus(200);
 });
 

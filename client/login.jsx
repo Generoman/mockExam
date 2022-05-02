@@ -17,7 +17,7 @@ export function randomString(length) {
 export async function sha256(string) {
   const binaryHash = await crypto.subtle.digest(
     "SHA-256",
-    new TextEncoder().encode(string)
+    new TextEncoder("utf-8").encode(string)
   );
 
   return btoa(String.fromCharCode.apply(null, new Uint8Array(binaryHash)))
@@ -35,16 +35,16 @@ export function Login() {
         element={<LoginRedirect endpoint={"google"} />}
       />
       <Route
-        path={"/redirect/idporten"}
-        element={<LoginRedirect endpoint={"idporten"} />}
+        path={"/redirect/microsoft"}
+        element={<LoginRedirect endpoint={"microsoft"} />}
       />
       <Route
         path={"/callback/google"}
         element={<LoginCallback endpoint={"google"} />}
       />
       <Route
-        path={"/callback/idporten"}
-        element={<LoginCallback endpoint={"idporten"} />}
+        path={"/callback/microsoft"}
+        element={<LoginCallback endpoint={"microsoft"} />}
       />
     </Routes>
   );
@@ -58,7 +58,7 @@ export function LoginPage() {
           <Link to={"/login/redirect/google"}>Login with Google</Link>
         </li>
         <li>
-          <Link to={"/login/redirect/idporten"}>Login with ID-Porten</Link>
+          <Link to={"/login/redirect/microsoft"}>Login with Microsoft</Link>
         </li>
       </ul>
     </>
@@ -73,12 +73,14 @@ export function LoginRedirect(props) {
       parameters.discovery_endpoint
     );
 
-    if (endpoint === "idporten") {
+    if (endpoint === "microsoft") {
+      const state = randomString(50);
       const code_verifier = randomString(50);
-      window.sessionStorage.setItem("expected_state", randomString(50));
+      window.sessionStorage.setItem("authorization_state", state);
       window.sessionStorage.setItem("code_verifier", code_verifier);
+      parameters.state = state;
       parameters.code_challenge = await sha256(code_verifier);
-      parameters.code_challenge_method = "S256";
+      //parameters.domain_hint = "egms.no";
     }
 
     parameters.redirect_uri =
@@ -98,69 +100,85 @@ export function LoginRedirect(props) {
 export function LoginCallback(props) {
   const navigate = useNavigate();
 
-  // const endpoint = props.endpoint;
-  // const { [endpoint]: parameters } = useContext(LoginContext);
-  // const { discovery_endpoint, client_id } = parameters;
-  //
-  // if (props.endpoint === "google") {
-  useEffect(async () => {
-    const { access_token } = Object.fromEntries(
-      new URLSearchParams(window.location.hash.substring(1))
-    );
+  const endpoint = props.endpoint;
 
-    await fetch("/api/login", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({ access_token }),
-    });
-    navigate("/");
-  }, []);
-  // } else if (props.endpoint === "idporten") {
-  //   useEffect(async () => {
-  //     const code_verifier = window.sessionStorage.getItem("expected_state");
-  //     const { access_token, state, code } = Object.fromEntries(
-  //       new URLSearchParams(window.location.hash.substring(1))
-  //     );
-  //
-  //     if (code_verifier !== state) {
-  //       return (
-  //         <>
-  //           <h1>Unexpected Redirect</h1>
-  //           <div>State Mismatch</div>
-  //         </>
-  //       );
-  //     }
-  //
-  //     if (code) {
-  //       const { token_endpoint } = await fetchJSON(discovery_endpoint);
-  //       const tokenResponse = await fetch(token_endpoint, {
-  //         method: "POST",
-  //         body: new URLSearchParams({
-  //           code,
-  //           grant_type: "authorization_code",
-  //           client_id,
-  //           code_verifier,
-  //         }),
-  //       });
-  //     }
-  //
-  //     await fetch("/api/login", {
-  //       method: "POST",
-  //       headers: {
-  //         "content-type": "application/json",
-  //       },
-  //       body: JSON.stringify({ access_token }),
-  //     });
-  //   }, []);
-  // } else {
-  //   return (
-  //     <>
-  //       <h1>Error: Unexpected Endpoint</h1>
-  //     </>
-  //   );
-  // }
+  const { [endpoint]: parameters } = useContext(LoginContext);
+  const { discovery_endpoint, client_id } = parameters;
+
+  const { access_token, state, code } = Object.fromEntries(
+    new URLSearchParams(window.location.hash.substring(1))
+  );
+
+  if (props.endpoint === "google") {
+    useEffect(async () => {
+      await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          endpoint: props.endpoint,
+        },
+        body: JSON.stringify({ access_token }),
+      });
+      navigate("/");
+    }, []);
+  } else if (props.endpoint === "microsoft") {
+    console.log("Endpoint: Microsoft");
+    useEffect(async () => {
+      console.log("in useEffect");
+      const expectedState = window.sessionStorage.getItem(
+        "authorization_state"
+      );
+      console.log(code);
+      if (state !== expectedState) {
+        console.log("State check failed");
+        return (
+          <>
+            <h1>Unexpected Redirect</h1>
+            <div>State Mismatch</div>
+          </>
+        );
+      }
+      console.log(code);
+      if (code) {
+        console.log("Code exists");
+        const { token_endpoint } = await fetchJSON(discovery_endpoint);
+        const code_verifier = window.sessionStorage.getItem("code_verifier");
+        const redirect_uri =
+          window.location.origin + "/login/callback/microsoft";
+        const tokenResponse = await fetch(token_endpoint, {
+          method: "POST",
+          body: new URLSearchParams({
+            code,
+            grant_type: "authorization_code",
+            client_id,
+            code_verifier,
+            redirect_uri,
+          }),
+        });
+        const { access_token } = await tokenResponse.json();
+        const body = {
+          access_token,
+          endpoint: props.endpoint,
+        };
+        const response = await fetch("/api/login", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+          },
+          body: JSON.stringify(body),
+        });
+        if (response.ok) {
+          navigate("/");
+        }
+      }
+    }, []);
+  } else {
+    return (
+      <>
+        <h1>Error: Unexpected Endpoint</h1>
+      </>
+    );
+  }
 
   return (
     <>

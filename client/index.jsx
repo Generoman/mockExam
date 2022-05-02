@@ -44,12 +44,20 @@ function Profile() {
     return <div>An error occurred: {error.toString()}</div>;
   }
 
+  if (!data) {
+    return (
+      <>
+        <h1>Please log in first</h1>
+      </>
+    );
+  }
+
   const { name, email, picture } = data;
 
   return (
     <>
       <h1>Profile</h1>
-      <img src={picture} alt={"profile picture"} width={"100px"} />
+      {picture && <img src={picture} alt={"profile picture"} width={"100px"} />}
       <div>Name: {name}</div>
       <div>Email: {email}</div>
     </>
