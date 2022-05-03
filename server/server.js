@@ -20,7 +20,7 @@ const dbName = "mock_exam_testing"; // change to "sample_mflix" for production o
 const app = express();
 
 app.use(bodyParser.json());
-app.use(cookieParser(Process.env.COOKIE_SECRET));
+app.use(cookieParser(process.env.COOKIE_SECRET));
 
 const mongoClient = new MongoClient(process.env.TEST_MONGODB_URL); // change to MONGODB_URL for production or TEST_MONGODB_URL for testing
 
