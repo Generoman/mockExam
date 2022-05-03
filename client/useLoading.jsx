@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export function useLoader(loadingFunc) {
+export function useLoading(loadingFunc) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState();
   const [data, setData] = useState();

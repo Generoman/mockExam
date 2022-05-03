@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
 import { fetchJSON } from "./fetchJSON";
-import { useLoader } from "./useLoader";
+import { useLoading } from "./useLoading";
 import { Login, LoginContext } from "./login";
 import { Movies } from "./movies";
 
@@ -32,7 +32,7 @@ function FrontPage() {
 }
 
 function Profile() {
-  const { loading, data, error } = useLoader(async () => {
+  const { loading, data, error } = useLoading(async () => {
     return await fetchJSON("/api/login");
   });
 
@@ -65,7 +65,7 @@ function Profile() {
 }
 
 function App() {
-  const { loading, error, data } = useLoader(
+  const { loading, error, data } = useLoading(
     async () => await fetchJSON("/api/config")
   );
 
