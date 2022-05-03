@@ -80,7 +80,6 @@ export function LoginRedirect(props) {
       window.sessionStorage.setItem("code_verifier", code_verifier);
       parameters.state = state;
       parameters.code_challenge = await sha256(code_verifier);
-      //parameters.domain_hint = "egms.no";
     }
 
     parameters.redirect_uri =
@@ -109,11 +108,12 @@ export function LoginCallback(props) {
     new URLSearchParams(window.location.hash.substring(1))
   );
 
-  if (props.endpoint === "google") {
+  if (endpoint === "google") {
+    console.log("Endpoint: Google");
     useEffect(async () => {
       const body = {
         access_token,
-        endpoint: props.endpoint,
+        endpoint,
       };
       await fetch("/api/login", {
         method: "POST",
@@ -127,7 +127,6 @@ export function LoginCallback(props) {
   } else if (props.endpoint === "microsoft") {
     console.log("Endpoint: Microsoft");
     useEffect(async () => {
-      console.log("in useEffect");
       const expectedState = window.sessionStorage.getItem(
         "authorization_state"
       );
@@ -141,7 +140,6 @@ export function LoginCallback(props) {
           </>
         );
       }
-      console.log(code);
       if (code) {
         console.log("Code exists");
         const { token_endpoint } = await fetchJSON(discovery_endpoint);
@@ -161,7 +159,7 @@ export function LoginCallback(props) {
         const { access_token } = await tokenResponse.json();
         const body = {
           access_token,
-          endpoint: props.endpoint,
+          endpoint,
         };
         const response = await fetch("/api/login", {
           method: "POST",

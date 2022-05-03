@@ -15,14 +15,15 @@ const __dirname = path.dirname(__filename);
 dotenv.config();
 
 const dbApiPath = "/api/movies";
-const dbName = "sample_mflix";
+const dbName = "mock_exam_testing"; // change to "sample_mflix" for production or "mock_exam_testing" for testing
 
 const app = express();
 
 app.use(bodyParser.json());
 app.use(cookieParser(Process.env.COOKIE_SECRET));
 
-const mongoClient = new MongoClient(process.env.MONGODB_URL); // .env-testing
+const mongoClient = new MongoClient(process.env.TEST_MONGODB_URL); // change to MONGODB_URL for production or TEST_MONGODB_URL for testing
+
 mongoClient.connect().then(async () => {
   console.log("Connected to MongoDB");
   app.use(dbApiPath, DatabaseApi(mongoClient.db(dbName)));
