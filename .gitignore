@@ -8,3 +8,4 @@
 /server/.env
 /.idea/
 /client/.env
+/client/__tests__/__snapshots__/*
